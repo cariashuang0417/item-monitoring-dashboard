@@ -1,0 +1,31 @@
+name: Execute License Reporting Tool
+
+on:
+  # push:
+  #   branches: [main]
+  # run monthly, every 1st at 7:15am UTC
+  # schedule:
+  #  - cron: '15 7 1 * *'
+  # allow it to be run on-demand
+  workflow_dispatch:
+
+jobs:
+  check-licensing:
+    name: Run license report tool against specified ARCGIS_PORTAL_URL secret
+    runs-on: ubuntu-latest
+    # see https://github.com/jtroe/cicd-container-images
+    # and https://github.com/jtroe/cicd-container-images/blob/main/python/arcgis-2.1.0-Conda.Linux.Dockerfile
+    container: ghcr.io/jtroe/cicd-container-images/arcgis-conda:2.1.0
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run license report tool
+        id: log_tool
+        env:
+          ARCGIS_PORTAL_URL: ${{ secrets.ARCGIS_PORTAL_URL }}
+          ARCGIS_PORTAL_ADMIN: ${{ secrets.ARCGIS_PORTAL_ADMIN }}
+          ARCGIS_PORTAL_ADMIN_PASSWORD: ${{ secrets.ARCGIS_PORTAL_ADMIN_PASSWORD }}
+        run: |
+          python app.py $ARCGIS_PORTAL_URL $ARCGIS_PORTAL_ADMIN $ARCGIS_PORTAL_ADMIN_PASSWORD
